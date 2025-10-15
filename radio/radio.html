@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Old Radio — Bangladesh AM/FM (Retro)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood:#3a2618; --wood2:#532f1a; --brass:#b08d57; --lamp:#ffd476; --text:#e9e2d6; --muted:#b8aa99;
+    --panel:#111319; --glass:#0b0f1e; --accent:#7aa2ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at -10% -10%, #1a2242 0, transparent 50%),linear-gradient(180deg,#0a0f1e,#0c1533 60%,#0a0f1e);color:var(--text);font:15px/1.55 'DM Sans',system-ui}
+  .wrap{max-width:980px;margin:24px auto;padding:16px}
+
+  /* Radio Cabinet */
+  .radio{position:relative;border-radius:24px;padding:18px;background:linear-gradient(135deg,var(--wood),var(--wood2));box-shadow:0 20px 80px rgba(0,0,0,.5), inset 0 0 0 2px rgba(0,0,0,.3)}
+  .grille{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+
+  /* Dial window */
+  .dial{position:relative;background:linear-gradient(180deg,#121829,#0d1326);border:1px solid #2b345f;border-radius:16px;padding:16px;box-shadow:inset 0 6px 16px rgba(0,0,0,.6), inset 0 -2px 0 rgba(255,255,255,.06)}
+  .scale{height:80px;position:relative;border-radius:10px;background:linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px) 0 0/24px 100%}
+  .tick{position:absolute;bottom:0;width:2px;height:16px;background:rgba(255,255,255,.35)}
+  .freq{position:absolute;top:10px;font-size:12px;color:#cbd6ff;transform:translateX(-50%)}
+  .needle{position:absolute;top:8px;bottom:8px;width:2px;background:#ff6a6a;box-shadow:0 0 8px #ff6a6a}
+  .brand{font-family:'UnifrakturCook',serif;font-size:28px;color:#f7e9c8;text-shadow:0 2px 0 rgba(0,0,0,.5);letter-spacing:.5px;margin-top:8px}
+
+  /* Speaker */
+  .speaker{background:repeating-linear-gradient(45deg,rgba(0,0,0,.25) 0 3px, rgba(0,0,0,.15) 3px 6px);border:1px solid rgba(0,0,0,.45);border-radius:16px;position:relative;overflow:hidden}
+  .badge{position:absolute;bottom:8px;right:10px;background:linear-gradient(180deg,#bf9b5f,#8b6b3b);color:#221;font-weight:700;border-radius:999px;padding:4px 10px;border:1px solid rgba(0,0,0,.4);font-size:12px}
+
+  /* Controls */
+  .controls{display:flex;gap:18px;align-items:center;margin-top:14px}
+  .lamp{width:10px;height:10px;border-radius:50%;background:#2a2a2a;box-shadow:inset 0 0 6px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15)}
+  .lamp.on{background:radial-gradient(circle at 30% 30%, var(--lamp), #e39b36 60%); box-shadow:0 0 12px var(--lamp), inset 0 0 6px rgba(0,0,0,.5)}
+
+  .knob{width:72px;height:72px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #c8b077, #7a6235);border:1px solid rgba(0,0,0,.5);box-shadow:inset 0 6px 14px rgba(0,0,0,.5), 0 6px 20px rgba(0,0,0,.3);position:relative;cursor:pointer;user-select:none}
+  .knob:after{content:"";position:absolute;inset:12px;border-radius:50%;background:radial-gradient(circle at 60% 40%, #886e3b, #3b2f17)}
+  .dot{position:absolute;width:6px;height:6px;border-radius:50%;background:#111;left:calc(50% - 3px);top:6px}
+  .label{font-size:12px;color:var(--muted);text-align:center;margin-top:6px}
+
+  .slider{appearance:none;width:100%;height:6px;border-radius:999px;background:rgba(0,0,0,.3);outline:none}
+  .slider::-webkit-slider-thumb{appearance:none;width:20px;height:20px;border-radius:50%;background:linear-gradient(180deg,#f6d186,#b88440);border:1px solid rgba(0,0,0,.5);box-shadow:0 2px 6px rgba(0,0,0,.4);cursor:pointer}
+
+  .row{display:flex;gap:14px;align-items:center}
+  .btn{border:1px solid rgba(0,0,0,.5);background:linear-gradient(180deg,#283254,#1a223e);color:#dfe6ff;padding:10px 14px;border-radius:10px;cursor:pointer}
+  .btn.active{box-shadow:0 0 0 2px #90b0ff inset}
+
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .preset{border:1px solid rgba(0,0,0,.5);background:linear-gradient(180deg,#3b2e1b,#261a0f);color:#ffefcc;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:12px}
+
+  .foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="radio">
+      <div class="grille">
+        <div class="dial">
+          <div class="brand">SuperTone</div>
+          <div class="scale" id="scale"></div>
+          <div class="needle" id="needle" style="left: 10%"></div>
+          <div class="controls">
+            <div class="row" style="gap:10px">
+              <div class="lamp" id="lamp"></div>
+              <button class="btn" id="power">Power</button>
+              <button class="btn active" id="fm">FM</button>
+              <button class="btn" id="am">AM</button>
+            </div>
+            <div style="flex:1"></div>
+            <div>
+              <div class="knob" id="volKnob"><span class="dot"></span></div>
+              <div class="label">Volume</div>
+            </div>
+            <div>
+              <div class="knob" id="tuneKnob"><span class="dot"></span></div>
+              <div class="label">Tuning</div>
+            </div>
+          </div>
+          <input id="tuner" class="slider" type="range" min="0" max="100" value="10" />
+          <div class="presets" id="presets"></div>
+        </div>
+        <div class="speaker">
+          <div class="badge">Hi-Fi</div>
+        </div>
+      </div>
+      <div class="foot">
+        <div>Stations: drag the tuner or use presets • Between stations you’ll hear static.</div>
+        <div id="now">—</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(()=>{
+  // ===== Bangladeshi presets (replace URLs with direct .mp3/.aac if any fail due to CORS) =====
+  const STATIONS = {
+    FM: [
+      {name:'Bangladesh Betar (FM 100.0)', url:'https://stream-URL-replace-with-direct.mp3'}, // replace with a direct stream if available
+      {name:'Traffic FM 88.8',             url:'https://stream-URL-replace-with-direct.mp3'},
+      {name:'Radio Today 89.6',            url:'https://stream-URL-replace-with-direct.mp3'},
+      {name:'Dhaka FM 90.4',               url:'https://stream-URL-replace-with-direct.mp3'},
+      {name:'Radio Foorti 88.0',           url:'https://onlineradiobox.com/json/bd/foorti/play?platform=web'},   // may still have CORS
+      {name:'Jago FM 94.4',                url:'https://onlineradiobox.com/json/bd/jago944/play?platform=web'}   // may still have CORS
+    ],
+    AM: [
+      {name:'Betar Dhaka 630 kHz',  url:'https://stream-URL-replace-with-direct.mp3'},
+      {name:'Betar Dhaka 693 kHz',  url:'https://stream-URL-replace-with-direct.mp3'},
+      {name:'Betar Dhaka 819 kHz',  url:'https://stream-URL-replace-with-direct.mp3'},
+      {name:'Betar Dhaka 1170 kHz', url:'https://stream-URL-replace-with-direct.mp3'}
+    ]
+  };
+
+  const powerBtn = document.getElementById('power');
+  const fmBtn = document.getElementById('fm');
+  const amBtn = document.getElementById('am');
+  const tuner = document.getElementById('tuner');
+  const needle = document.getElementById('needle');
+  const scale = document.getElementById('scale');
+  const lamp = document.getElementById('lamp');
+  const volKnob = document.getElementById('volKnob');
+  const tuneKnob = document.getElementById('tuneKnob');
+  const now = document.getElementById('now');
+  const presetsEl = document.getElementById('presets');
+
+  let band = 'FM';
+  let powered = false;
+  let currentIndex = 0;
+  let volume = 0.7; // 0..1
+
+  // Build dial ticks (FM default)
+  function buildDial(){
+    scale.innerHTML='';
+    for(let i=0;i<=10;i++){
+      const t = document.createElement('div'); t.className='tick'; t.style.left = (i*10)+'%'; t.style.height = (i%5===0?'24px':'16px'); scale.appendChild(t);
+      const f = document.createElement('div'); f.className='freq'; f.style.left=(i*10)+'%';
+      f.textContent = (band==='FM'? (80 + i*2) + ' MHz' : (500 + i*50) + ' kHz');
+      scale.appendChild(f);
+    }
+  }
+
+  // Presets
+  function renderPresets(){
+    presetsEl.innerHTML='';
+    STATIONS[band].forEach((s,idx)=>{
+      const b=document.createElement('button'); b.className='preset'; b.textContent=s.name; b.onclick=()=> tuneTo(idx);
+      presetsEl.appendChild(b);
+    });
+  }
+
+  // WebAudio: noise + station audio with crossfade
+  const ctx = new (window.AudioContext||window.webkitAudioContext)();
+  const master = ctx.createGain(); master.gain.value=volume; master.connect(ctx.destination);
+  const noiseNode = ctx.createBufferSource();
+  const noiseGain = ctx.createGain(); noiseGain.gain.value = 0.0; noiseGain.connect(master);
+  function makeNoiseBuffer(){
+    const dur=2.0, len = Math.floor(ctx.sampleRate*dur); const buf=ctx.createBuffer(1,len,ctx.sampleRate); const data=buf.getChannelData(0);
+    for(let i=0;i<len;i++){ data[i]=(Math.random()*2-1)*0.35; }
+    return buf;
+  }
+  noiseNode.buffer = makeNoiseBuffer(); noiseNode.loop = true; noiseNode.connect(noiseGain); noiseNode.start();
+
+  const audio = new Audio(); audio.crossOrigin='anonymous'; audio.preload='none'; audio.loop=false; audio.autoplay=false;
+  const src = ctx.createMediaElementSource(audio);
+  const musicGain = ctx.createGain(); musicGain.gain.value=0.0; src.connect(musicGain); musicGain.connect(master);
+
+  function setVolume(v){ volume=v; master.gain.value=v; rotate(volKnob, v*270-135); }
+  setVolume(volume);
+
+  function power(toggle){
+    powered = (toggle!==undefined)? toggle : !powered;
+    lamp.classList.toggle('on', powered);
+    powerBtn.classList.toggle('active', powered);
+    if(!powered){
+      musicGain.gain.setTargetAtTime(0, ctx.currentTime, 0.05);
+      noiseGain.gain.setTargetAtTime(0, ctx.currentTime, 0.05);
+      audio.pause(); now.textContent='—';
+    } else {
+      noiseGain.gain.setTargetAtTime(0.2, ctx.currentTime, 0.2);
+      if(audio.src) audio.play().catch(()=>{});
+    }
+  }
+
+  function rotate(el,deg){ el.style.transform = `rotate(${deg}deg)`; }
+
+  // Tuning logic: map slider to stations with gaps producing static
+  function tuneBySlider(val){
+    const stations = STATIONS[band];
+    const seg = 100 / stations.length;
+    const idx = Math.floor(val/seg);
+    const within = (val % seg) / seg; // 0..1
+    currentIndex = Math.min(idx, stations.length-1);
+    const center = 0.5; const dist = Math.abs(within - center); // closer to center -> clear audio
+    const clarity = Math.max(0, 1 - dist*3); // 0..1
+    musicGain.gain.setTargetAtTime(powered? clarity : 0, ctx.currentTime, 0.05);
+    noiseGain.gain.setTargetAtTime(powered? (0.35 - clarity*0.3) : 0, ctx.currentTime, 0.05);
+    moveNeedle(val);
+    if(powered){ loadIfNeeded(currentIndex); }
+  }
+
+  function moveNeedle(val){ needle.style.left = `${val}%`; rotate(tuneKnob, (val/100)*270-135); }
+
+  function loadIfNeeded(i){
+    const s = STATIONS[band][i];
+    if(!s) return;
+    if(audio.dataset.station !== s.name){
+      audio.src = s.url;  // NOTE: needs direct stream URL with CORS allowed
+      audio.play().catch(()=>{});
+      audio.dataset.station = s.name; now.textContent = `${band} · ${s.name}`;
+    }
+  }
+
+  function tuneTo(i){
+    const step = (100 / STATIONS[band].length);
+    tuner.value = (i + 0.5) * step;
+    tuneBySlider(+tuner.value);
+  }
+
+  // Events
+  tuner.addEventListener('input', ()=> tuneBySlider(+tuner.value));
+  powerBtn.onclick = ()=> power();
+  fmBtn.onclick = ()=>{
+    band='FM'; fmBtn.classList.add('active'); amBtn.classList.remove('active'); buildDial(); renderPresets(); tuneTo(0);
+  };
+  amBtn.onclick = ()=>{
+    band='AM'; amBtn.classList.add('active'); fmBtn.classList.remove('active'); buildDial(); renderPresets(); tuneTo(0);
+  };
+
+  // Drag knobs
+  dragKnob(volKnob, (p)=>{ const v = Math.min(1, Math.max(0, p)); setVolume(v); });
+  dragKnob(tuneKnob, (p)=>{ const v = Math.round(p*100); tuner.value = v; tuneBySlider(v); });
+
+  function dragKnob(knob, onMove){
+    let dragging=false, startAngle=0;
+    knob.addEventListener('mousedown', start);
+    knob.addEventListener('touchstart', (e)=> start(e.touches[0]));
+    function start(e){ dragging=true; e.preventDefault(); startAngle=getAngle(e, knob); document.addEventListener('mousemove', move); document.addEventListener('mouseup', stop); document.addEventListener('touchmove', tmove, {passive:false}); document.addEventListener('touchend', stop); }
+    function tmove(ev){ move(ev.touches[0]); ev.preventDefault(); }
+    function move(e){ if(!dragging) return; const ang=getAngle(e, knob); const delta=ang - startAngle; startAngle=ang; const current=getRotation(knob); const next=clamp(current+delta, -135, 135); rotate(knob, next); const percent=(next+135)/270; onMove(percent); }
+    function stop(){ dragging=false; document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', stop); document.removeEventListener('touchmove', tmove); document.removeEventListener('touchend', stop); }
+  }
+  function getAngle(e, el){ const r=el.getBoundingClientRect(); const cx=r.left+r.width/2, cy=r.top+r.height/2; return Math.atan2(e.clientY-cy, e.clientX-cx) * 180/Math.PI; }
+  function getRotation(el){ const tr=getComputedStyle(el).transform; if(tr==='none') return 0; const a=tr.match(/matrix\\(([-0-9., ]+)\\)/); if(!a) return 0; const m=a[1].split(','); const angle=Math.atan2(m[1], m[0]) * 180/Math.PI; return angle; }
+  const clamp=(n,a,b)=> Math.max(a, Math.min(b,n));
+
+  // Boot
+  buildDial();
+  renderPresets();
+  tuneTo(0);
+  power(true);
+})();
+</script>
+</body>
+</html>
